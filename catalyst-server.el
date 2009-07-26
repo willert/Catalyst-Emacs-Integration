@@ -23,10 +23,12 @@
 
 ;;; Commentary:
 
-;; This is a pre-release version, nothing is stable at the moment.
-;; Most likely, the parent mode will be switched from eshell-mode
-;; to compile-mode and support for eproject.el by jrock will be
-;; added in the near future.
+;; This is a pre-release version, nothing is stable at the moment,
+;; although I am quite happy with using comint.el after a lot of
+;; experimentation with other inferior interpreter or shell modes.
+;; Most likely, I'll try to add a new major mode to allow for better
+;; customization and add support for eproject.el by jrockway. Patches
+;; and pull requests are always welcome :)
 
 ;;; Disclaimer:
 
