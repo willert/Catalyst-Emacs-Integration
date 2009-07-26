@@ -1,0 +1,8 @@
+catalyst-server.el:
+  A helper script for comint.el, that is capable to find and start
+  your myapp-server.pl script and scan the output for file-paths
+  and lines that will automatically be linked.
+
+  Just load the library and have a look at these to functions:
+   - catalyst-server-start-or-show-process
+   - catalyst-server-kill-process
