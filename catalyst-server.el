@@ -43,25 +43,39 @@
   "Run a catalyst server process for this project via comint, parse output."
   :group 'perl)
 
+;; ; cargo-culted from compile.el
+;; (defconst catalyst-server-filename-regexp-alist-alist
+;;   '((log4perl
+;;      " +\\(\
+;; /[a-zA-Z0-9._/-]*\.pm\
+;; \\) +\\(\\+\\|line +\\)\\([0-9]+\\)" 1 3)
+;;     (log4perl-relative
+;;      " +\\(\
+;; lib/[a-zA-Z0-9._/-]*\\.pm\\|\
+;; t/[a-zA-Z0-9._/-]*\\.t\\|\
+;; t/[a-zA-Z0-9._/-]*\\.pm\\|\
+;; script/[a-zA-Z0-9._/-]*\\.pl\\|\
+;; root/[a-zA-Z0-9._/-]*\\|\
+;; bin/[a-zA-Z0-9._/-]*\\|\
+;; sbin/[a-zA-Z0-9._/-]*\
+;; \\) +\\(\\+\\|line +\\)\\([0-9]+\\)" 1 3)
+;;     (stack-trace
+;;      "\\[\\(/[a-zA-Z0-9._/-]*\\):\\([0-9]+\\)\\]" 1 2)
+;;     (perl
+;;      " at \\([^ \n]+\\) line \\([0-9]+\\)\
+;; \\(?:[,.]\\|$\\| during global destruction\\.$\\)" 1 2))
+;;   "Alist of values for `catalyst-server-filename-regexp-alist'.")
+;;
+
 ; cargo-culted from compile.el
 (defconst catalyst-server-filename-regexp-alist-alist
   '((log4perl
-     " +\\(\
-/[a-z0-9._/-]*\.pm\\|\
-\\) +\\(\\+\\|line +\\)\\([0-9]+\\)" 1 3)
-    (log4perl-relative
-     " +\\(\
-lib/[a-z0-9._/-]*\.pm\\|\
-t/[a-z0-9._/-]*\.t\\|\
-t/[a-z0-9._/-]*\.pm\\|\
-script/[a-z0-9._/-]*\.pl\
-root/[a-z0-9._/-]*\\|\
-bin/[a-z0-9._/-]*\\|\
-sbin/[a-z0-9._/-]*\\|\
-\\) +\\(\\+\\|line +\\)\\([0-9]+\\)" 1 3)
-    (perl
-     " at \\([^ \n]+\\) line \\([0-9]+\\)\
-\\(?:[,.]\\|$\\| during global destruction\\.$\\)" 1 2))
+     "\\( +\\|\\[\\)\
+\\([a-zA-Z0-9._/-]*\\.pm\\|[a-zA-Z0-9._/-]*\\.pl\
+\\|[a-zA-Z0-9._/-]*\\.t\\|[a-zA-Z0-9._/-]+\\)\
+\\( \\+\\| line \\|:\\)\
+\\([0-9]+\\)\
+\\( +\\|\\]\\)" 2 4))
   "Alist of values for `catalyst-server-filename-regexp-alist'.")
 
 (defcustom catalyst-server-filename-regexp-alist
@@ -178,7 +192,7 @@ The `file-name' specifies the file name to search for."
             (if (file-executable-p fn) fn))
          (mapcar
           '(lambda (dir) (expand-file-name (concat dir "/" script-name) server-root) )
-          (cons "script" (cons "bin" (cons "sbin" nil)))
+          (cons "bin" (cons "sbin" (cons "script" nil)))
           ))
         )))))
 
@@ -248,8 +262,6 @@ get rid of any existing processes"
       ;; buffer creation, but we'd need a way to handle
       ;; successful window walks together with restart commands
       ;; somehow. I told you, I suck at elisp
-      (add-hook 'comint-output-filter-functions
-                'catalyst-server-compilation-scan-buffer t t)
 
       (setq default-directory server-root)
 
@@ -257,13 +269,23 @@ get rid of any existing processes"
 
       (make-comint-in-buffer process-name buf server-cmd nil "-r" "-d")
 
+      (make-local-variable 'comint-output-filter-functions)
+
+      (setq comint-output-filter-functions nil )
+
+                                        
+      (add-hook 'comint-output-filter-functions
+                'comint-truncate-buffer) ;comint gets really slow otherwise
+
+      (add-hook 'comint-output-filter-functions
+                'comint-postoutput-scroll-to-bottom)
+
+      (add-hook 'comint-output-filter-functions
+                'catalyst-server-compilation-scan-buffer)
+
       (add-hook 'comint-output-filter-functions
                 'ansi-color-process-output)
 
-      (add-hook 'comint-output-filter-functions
-                'comint-postoutput-scroll-to-bottom t t)
-
-      (make-local-variable 'ansi-color-for-comint-mode)
       (ansi-color-for-comint-mode-on)
 
       (setq catalyst-server-last-server-buffer buf)
@@ -288,7 +310,8 @@ according to `catalyst-server-filename-regexp-alist'"
          (file-pos (nth 1 item))
          (line-pos (nth 2 item)))
 
-      (while (and (< last-match (point-max)) (string-match regex (buffer-string) last-match))
+      (while (and regex (< last-match (point-max))
+                  (string-match regex (buffer-string) last-match))
 
         (let
             ((fn-start (+ 2 (match-beginning 0)))
