@@ -154,7 +154,8 @@ The `file-name' specifies the file name to search for."
       ((catalyst-server-root (catalyst-server-find-root)))
     (assert catalyst-server-root nil
             "Can't find catalyst server root for %s" default-directory)
-    (let
+    (or
+     (let
         ((makefile (expand-file-name "Makefile.PL" catalyst-server-root)))
       (with-temp-buffer
         (insert-file-contents-literally makefile)
@@ -165,7 +166,22 @@ The `file-name' specifies the file name to search for."
             (replace-regexp-in-string
              "-" "::" (match-string 3 (buffer-string)))
           ))
-      ))
+      )
+
+     (let
+        ((makefile (expand-file-name "dist.ini" catalyst-server-root)))
+      (with-temp-buffer
+        (insert-file-contents-literally makefile)
+        (goto-char (point-min))
+        (if (string-match
+             "name *= *\\([a-zA-Z0-9:-]+\\)"
+             (buffer-string))
+            (replace-regexp-in-string
+             "-" "::" (match-string 1 (buffer-string)))
+          ))
+      )
+
+    ))
   )
 
 (defun catalyst-server-guess-server-script ()
@@ -273,7 +289,7 @@ get rid of any existing processes"
 
       (setq comint-output-filter-functions nil )
 
-                                        
+
       (add-hook 'comint-output-filter-functions
                 'comint-truncate-buffer) ;comint gets really slow otherwise
 
