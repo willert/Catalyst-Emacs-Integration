@@ -138,7 +138,10 @@ The `file-name' specifies the file name to search for."
 (defun catalyst-server-find-root ()
   "Tries to find the perl project root for the current dirctory"
   (let
-      ((server-root (catalyst-server-find-upwards "Makefile.PL")))
+      ((server-root (or
+                     (catalyst-server-find-upwards "Makefile.PL")
+                     (catalyst-server-find-upwards "dist.ini")
+                    )))
 
     ; try to find server root last
     (if (and (not server-root) catalyst-server-last-server-buffer
@@ -155,10 +158,12 @@ The `file-name' specifies the file name to search for."
     (assert catalyst-server-root nil
             "Can't find catalyst server root for %s" default-directory)
     (or
-     (let
-        ((makefile (expand-file-name "Makefile.PL" catalyst-server-root)))
+     (let*
+        ((makefile (expand-file-name "Makefile.PL" catalyst-server-root))
+         (distfile (expand-file-name "dist.ini" catalyst-server-root))
+         (meta (if (file-exists-p makefile) makefile distfile)))
       (with-temp-buffer
-        (insert-file-contents-literally makefile)
+        (insert-file-contents-literally meta)
         (goto-char (point-min))
         (if (string-match
              "\\(^ *\\|; *\\)name *(? *\\('\\|\"\\)\\([a-zA-Z0-9:-]+\\)\\2"
