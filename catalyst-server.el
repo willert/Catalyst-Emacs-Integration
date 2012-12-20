@@ -288,7 +288,14 @@ get rid of any existing processes"
 
       (if restart (progn (catalyst-server-kill-process) (sleep-for 1)))
 
-      (make-comint-in-buffer process-name buf server-cmd nil "-r" "-d")
+      (if (file-executable-p (concat server-root "/perl5/bin/mist-run"))
+          (make-comint-in-buffer
+           process-name buf (concat server-root "/perl5/bin/mist-run")
+           nil "perl" server-cmd "-r" "-d")
+
+        (make-comint-in-buffer
+         process-name buf "perl"
+         nil "-Mlocal::lib=perl5" server-cmd "-r" "-d"))
 
       (make-local-variable 'comint-output-filter-functions)
 
