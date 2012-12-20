@@ -364,3 +364,4 @@ according to `catalyst-server-filename-regexp-alist'"
                                 (match-end line-pos)))
           ))) ) catalyst-server-filename-regexp-alist )))
 
+(provide 'catalyst-server)
