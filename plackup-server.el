@@ -290,13 +290,18 @@ get rid of any existing processes"
 
       (if (file-executable-p (concat server-root "/perl5/bin/mist-run"))
           (make-comint-in-buffer
-           process-name buf (concat server-root "/perl5/bin/mist-run")
-           nil "plackup" "-r" "-R" (concat server-root "etc") "-E" "development" psgi-app )
+           process-name buf (concat server-root "/perl5/bin/mist-run") nil
+           "plackup" "-r" "-R" (concat server-root "etc")
+           "-E" "development"
+           "--access-log" "/dev/null"
+           psgi-app)
 
         (make-comint-in-buffer
-         process-name buf "perl"
-         nil "-Mlocal::lib=perl5"
-         "plackup" "-r" "-R" "etc" "-E" "development" psgi-app ))
+         process-name buf "perl" nil "-Mlocal::lib=perl5"
+         "plackup" "-r" "-R" "etc"
+         "-E" "development"
+         "--access-log" "/dev/null"
+         psgi-app))
 
       (make-local-variable 'comint-output-filter-functions)
 
