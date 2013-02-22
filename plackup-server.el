@@ -146,7 +146,7 @@ The `file-name' specifies the file name to search for."
     ; try to find server root last
     (if (and (not server-root) plackup-server/last-server-buffer
              (buffer-live-p plackup-server/last-server-buffer))
-        (setq server-root (with-buffer plackup-server/last-server-buffer
+        (setq server-root (with-current-buffer plackup-server/last-server-buffer
               (plackup-server/find-root))))
 
     (if server-root (file-name-directory server-root))))
@@ -226,14 +226,14 @@ xargs, kill) are used to to find and kill processes matching
 
   (let*
       ((module-name (plackup-server/guess-server-module))
-       (process-name (concat module-name " Server"))
+       (process-name (concat module-name " Plackup Server"))
        (commands-buffer-name (concat "* " process-name " *"))
        (buf (get-buffer commands-buffer-name))
        (psgi-app
         (file-name-nondirectory (plackup-server/guess-psgi-app))))
 
     (if (and buf (get-buffer-process buf))
-        (with-buffer buf (comint-kill-subjob)))
+        (with-current-buffer buf (comint-kill-subjob)))
 
     (if (and force
              (assert psgi-app  nil "Failed to find plackup server script"))
@@ -256,7 +256,7 @@ get rid of any existing processes"
 
     (let*
         ((module-name (plackup-server/guess-server-module))
-         (process-name (concat module-name " Server"))
+         (process-name (concat module-name " Plackup Server"))
          (commands-buffer-name (concat "* " process-name " *"))
          (buf (get-buffer commands-buffer-name))
          (psgi-app (plackup-server/guess-psgi-app))
