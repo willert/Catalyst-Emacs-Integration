@@ -70,12 +70,22 @@
 ; cargo-culted from compile.el
 (defconst plackup-server/filename-regexp-alist-alist
   '((log4perl
-     "\\( +\\|\\[\\)\
-\\([a-zA-Z0-9._/-]*\\.pm\\|[a-zA-Z0-9._/-]*\\.pl\
-\\|[a-zA-Z0-9._/-]*\\.t\\|[a-zA-Z0-9._/-]+\\)\
-\\( \\+\\| line \\|:\\)\
-\\([0-9]+\\)\
-\\( +\\|\\]\\)" 2 4))
+     "\
+\\( +\\|\\[\\)\
+\\(\
+[a-zA-Z0-9._/-]*\\.pm\\|\
+[a-zA-Z0-9._/-]*\\.pl\\|\
+[a-zA-Z0-9._/-]*\\.m.\\|\
+[a-zA-Z0-9._/-]*\\.t\\|\
+[a-zA-Z0-9._/-][a-zA-Z0-9._/-]*\
+\\)\
+\\(\
+ \\+\\|\
+ line \\|\
+:\
+\\)\
+\\([0-9][0-9]*\\)\
+.*" 2 4))
   "Alist of values for `plackup-server/filename-regexp-alist'.")
 
 (defcustom plackup-server/filename-regexp-alist
