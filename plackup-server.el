@@ -346,21 +346,36 @@ get rid of any existing processes"
       (setq comint-output-filter-functions nil )
 
       (add-hook 'comint-output-filter-functions
-                'comint-truncate-buffer) ;comint gets really slow otherwise
+                'plackup-server/clear-on-restart) ;comint gets really slow otherwise
 
       (add-hook 'comint-output-filter-functions
-                'comint-postoutput-scroll-to-bottom)
+                'comint-truncate-buffer t) ;comint gets really slow otherwise
 
       (add-hook 'comint-output-filter-functions
-                'plackup-server/compilation-scan-buffer)
+                'plackup-server/compilation-scan-buffer t)
 
       (add-hook 'comint-output-filter-functions
-                'ansi-color-process-output)
+                'ansi-color-process-output t)
+
+      (add-hook 'comint-output-filter-functions
+                'comint-postoutput-scroll-to-bottom t)
 
       (ansi-color-for-comint-mode-on)
 
       (setq plackup-server/last-server-buffer buf)
 )))
+
+(defun plackup-server/clear-on-restart (original-output)
+  (let*
+      ((regex "Successfully killed! Restarting the new server process")
+       (last-match nil))
+
+    (while (string-match regex (buffer-string) (if last-match (+ last-match 1) 10))
+      (setq last-match (match-beginning 0)))
+
+    (message "Reg: %s %s " last-match (buffer-end 1) )
+
+    (if last-match (delete-region 1 (+ last-match 1)))))
 
 (defun plackup-server/compilation-scan-buffer (original-output)
   "A `comint-output-filter-functions' hook to creates buttons
