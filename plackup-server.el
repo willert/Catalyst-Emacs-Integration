@@ -341,9 +341,16 @@ get rid of any existing processes"
            "--access-log" "/dev/null"
            psgi-app)))
 
-      (make-local-variable 'comint-output-filter-functions)
+      (compilation-minor-mode)
 
+      ;; let C-c C-c pass through for comint-mode's abort function
+      (define-key compilation-minor-mode-map (kbd "C-c C-c" ) nil)
+
+      (make-local-variable 'comint-output-filter-functions)
       (setq comint-output-filter-functions nil )
+
+      (make-local-variable 'comint-buffer-maximum-size)
+      (setq comint-buffer-maximum-size 4096)
 
       (add-hook 'comint-output-filter-functions
                 'plackup-server/clear-on-restart) ;comint gets really slow otherwise
@@ -372,8 +379,6 @@ get rid of any existing processes"
 
     (while (string-match regex (buffer-string) (if last-match (+ last-match 1) 10))
       (setq last-match (match-beginning 0)))
-
-    (message "Reg: %s %s " last-match (buffer-end 1) )
 
     (if last-match (delete-region 1 (+ last-match 1)))))
 
