@@ -359,9 +359,6 @@ get rid of any existing processes"
                 'comint-truncate-buffer t) ;comint gets really slow otherwise
 
       (add-hook 'comint-output-filter-functions
-                'plackup-server/compilation-scan-buffer t)
-
-      (add-hook 'comint-output-filter-functions
                 'ansi-color-process-output t)
 
       (add-hook 'comint-output-filter-functions
